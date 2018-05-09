@@ -1,0 +1,35 @@
+{
+  "name": "@secondmind/rtc",
+  "version": "1.0.0",
+  "description": "This module make real-time communication for Second Mind AI components possible.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itorepo/SecondMind-RTVSP.git"
+  },
+  "keywords": [
+    "RTP",
+    "RTVSP",
+    "TCP",
+    "IPC",
+    "Real-time",
+    "Communication"
+  ],
+  "author": "Kostyantyn Didenko <kdidenko@secondmind.ai>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/itorepo/SecondMind-RTVSP/issues"
+  },
+  "homepage": "https://github.com/itorepo/SecondMind-RTVSP#readme",
+  "dependencies": {
+    "config": "^1.30.0",
+    "debug": "^3.1.0",
+    "winston": "^3.0.0-rc5"
+  },
+  "devDependencies": {
+    "should": "^13.2.1"
+  }
+}

@@ -1,0 +1,108 @@
+'use strict';
+
+const net = require('net');
+const config = require('config').get('rtsp.client');
+const logger = require('../loggers/combined')('RTSP.Client');
+
+/**
+ * @namespace RTSP
+ * "Real-Time Voice Streaming Protocol"-stack package.
+ */
+const RTSP = (() => {
+
+
+	/**
+	 * @see `net.createServer()` and `socket.on('end')` for details
+	 * RTSP Client Options are:
+	 * {
+	 *  @property {Number} fd - If specified, wrap client around an existing socket with given descriptor
+	 *  @property {boolean} allowHalfOpen - indicates whether half-opened TCP connections are allowed
+	 *  @property {boolean} readable - allow reads on the socket when an fd is passed, otherwise ignored.
+	 *  @property {boolean} writable - allow writes on the socket when an fd is passed, otherwise ignored.
+	 * }
+	 */
+	const ClientOptions = function (template) {
+		if (template.port || template.host) {
+			let {host, port} = template;
+
+			host = (host && (typeof host === 'string'))
+				? host : config.host;
+			//TODO: `host` may be tested via url.parse()
+			port = (port && (
+					typeof port === 'number' || !Number.isNaN(Number.parseInt(port))
+				)) ? port : config.port;
+			//TODO: add isHost() | isPort() methods later on, to get rid of this code from constructor
+
+
+		} else if (template.fd && template.fd instanceof net.Socket) {
+
+		} else if (template instanceof net.Socket) {
+
+		} else {
+			let message = "Wrong options were specified when initializing the Client module";
+			logger.error(message);
+			logger.debug("Options sullied:", options);
+			throw new TypeError(message);
+		}
+	};
+
+
+	/**
+	 * @constructor
+	 * @param {Object} options - used during the client initialization
+	 */
+	const Client = function Client(options) {
+		net.Socket.call(this);
+	};
+
+	/** @prototype */
+	Client.prototype = Object.create(net.Socket.prototype);
+	Client.prototype.constructor = Client;
+	Client.prototype.on = (event, ...rest) => {
+		logger.info("some event occurred; see logs below");
+		logger.debug(event);
+		logger.debug(rest);
+	}
+
+	/**
+	 * Client module initialization, called once during the module is imported.
+	 *
+	 * @static RTSP.Client.from()
+	 * @param options ({port:Number,host:String}|{fd:net.Socket}|{net.Socket})
+	 * @returns rtcClient {Client} - new Client instance depending on
+	 * the {options} parameter specified during the module import.
+	 */
+	return function from(options) {
+		if (options.port) {
+			// a client for the new connection
+			let {port, host} = options;
+			port = (port && (typeof port === Number || Number.parseInt(port) !== NaN))
+				? port
+				: config.port;
+
+			let connection = net.createConnection({port, host},
+				() => logger.log('Client connected to server', connection.address())
+			);
+			options = {fd: connection};
+		} else if (options.fd && options.fd instanceof net.Socket) {
+			// a client by existing file descriptor connection
+			options = {fd: options.fd};
+		} else if (options instanceof net.Socket) {
+			// a client by existing connection's socket
+			options = {fd: options};
+		} else {
+			// unsupported client initialization
+			let message = "Wrong options were specified when initializing the Client module";
+			logger.error(message);
+			logger.debug("Options sullied:", options);
+			throw new TypeError(message);
+		}
+		/** @returns {RTSP.Client} */
+		return new Client(options);
+	}
+})();
+
+/**
+ * @exports {RTSP}
+ * */
+module.exports = RTSP;
